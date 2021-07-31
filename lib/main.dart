@@ -96,6 +96,7 @@ class _MyAppState extends State<MyApp> {
 
   void getHttp() async {
     try {
+      //xinzengbeizhu
       var response = await Dio().get('http://127.0.0.1:37000/npc.conf');
       print(response.data);
     } catch (e) {
