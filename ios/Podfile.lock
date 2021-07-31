@@ -1,0 +1,29 @@
+PODS:
+  - Flutter (1.0.0)
+  - libOpenInstallSDK (2.5.3)
+  - openinstall_flutter_plugin (0.0.1):
+    - Flutter
+    - libOpenInstallSDK
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - openinstall_flutter_plugin (from `.symlinks/plugins/openinstall_flutter_plugin/ios`)
+
+SPEC REPOS:
+  trunk:
+    - libOpenInstallSDK
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  openinstall_flutter_plugin:
+    :path: ".symlinks/plugins/openinstall_flutter_plugin/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  libOpenInstallSDK: 0419f11eddbe2257309a5276c35b56c0ba0a1954
+  openinstall_flutter_plugin: e6b8486f834eb60b336546442a8b747d4b664cf4
+
+PODFILE CHECKSUM: 8e679eca47255a8ca8067c4c67aab20e64cb974d
+
+COCOAPODS: 1.10.1
