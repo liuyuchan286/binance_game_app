@@ -1,116 +1,111 @@
 import 'dart:async';
+import 'dart:convert';
 
-import 'package:dio/dio.dart';
+import 'package:binance_game_app/actual_bag.dart';
+import 'package:binance_game_app/constant/constant.dart';
+import 'package:binance_game_app/utils/cache_util.dart';
 import 'package:flutter/material.dart';
 import 'package:openinstall_flutter_plugin/openinstall_flutter_plugin.dart';
 
-void main() => runApp(MyApp());
+import 'vest_bag.dart';
 
-class MyApp extends StatefulWidget {
+void main() => runApp(ShowTagApp());
+
+
+class ShowTagApp extends StatefulWidget {
+  const ShowTagApp({Key key}) : super(key: key);
+
   @override
-  _MyAppState createState() => _MyAppState();
+  _ShowTagAppState createState() => _ShowTagAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  String wakeUpLog = "";
-  String installLog = "";
-  late OpeninstallFlutterPlugin _openinstallFlutterPlugin;
+class _ShowTagAppState extends State<ShowTagApp> {
+    //下载插件
+   OpeninstallFlutterPlugin _openinstallFlutterPlugin;
+   //显示的控制参数
+   String bindData_falg = "";
+   //下载的参数
+   String installLog = "";
 
-  @override
-  void initState() {
-    super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    _openinstallFlutterPlugin = new OpeninstallFlutterPlugin();
-    // for ad track
-    // _openinstallFlutterPlugin.config(true, "oaid", null);
-    // _openinstallFlutterPlugin.init(wakeupHandler, true);
-    _openinstallFlutterPlugin.init(wakeupHandler);
-
-
-    setState(() {
-    });
-  }
-
+   @override
+   void initState() {
+     //初始化,判断是否已经有了参数
+     CacheUtil.getData<bool>(Constant.APP_FLAG_FUTURE).then((value){
+       if (value != null && value) {
+         setState(() {
+           bindData_falg = Constant.Y;
+         });
+       }else if (value != null && !value) {
+         setState(() {
+           bindData_falg = Constant.N;
+         });
+       }else{
+         initPlatformState();
+       }
+     });
+     super.initState();
+   }
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('openinstall plugin demo'),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(installLog, style: TextStyle(fontSize: 20)),
-              Text(wakeUpLog, style: TextStyle(fontSize: 20)),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () {
-                  _openinstallFlutterPlugin.install(installHandler);
-                },
-                child: Text('getInstall', style: TextStyle(fontSize: 20)),
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () {
-                  _openinstallFlutterPlugin.reportRegister();
-                },
-                child: const Text('reportRegister',
-                    style: TextStyle(fontSize: 20)),
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () {
-                  _openinstallFlutterPlugin.reportEffectPoint("effect_test", 1);
-                },
-                child: const Text('reportEffectPoint',
-                    style: TextStyle(fontSize: 20)),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+     print("bindData_falg = ${bindData_falg}");
+     if(bindData_falg == Constant.Y) {
+       return ActualBagPage();
+     }else if(bindData_falg == Constant.N){
+       return MyApp();
+     }
+     return MaterialApp(
+       home: Scaffold(
+         body: Center(
+           child: Container(
+             color: Colors.white,
+           ),
+         ),
+       ),
+     );
   }
 
-  Future installHandler(Map<String, dynamic> data) async {
-    getHttp();
-    setState(() {
-      installLog += "install result : channel=" +
-          data['channelCode'] +
-          ", data=" +
-          data['bindData'].toString() +
-          "\n";
-    });
-  }
 
-  void getHttp() async {
-    try {
-      //xinzengbeizhu
-      var response = await Dio().get('http://127.0.0.1:37000/npc.conf');
-      print(response.data);
-    } catch (e) {
-      print(e);
-    }
-  }
+   Future<void> initPlatformState() async {
+     if (!mounted) return null;
+     //初始化
+     _openinstallFlutterPlugin = new OpeninstallFlutterPlugin();
+     //init
+     _openinstallFlutterPlugin.init(wakeupHandler);
+     //获取下载参数
+     _openinstallFlutterPlugin.install(installHandler);
+   }
 
-  Future wakeupHandler(Map<String, dynamic> data) async {
-    setState(() {
-      wakeUpLog += "wakeup result : channel=" +
-          data['channelCode'] +
-          ", data=" +
-          data['bindData'].toString() +
-          "\n";
-    });
-  }
+   Future installHandler(Map<String, dynamic> data) async {
+
+     dynamic channelCode = data['channelCode'];
+     dynamic bindData = data['bindData'];
+
+     if(bindData != null && bindData != '') {
+       //显示 binance app
+       bindData_falg = Constant.Y;
+       //存下邀请人数据
+       CacheUtil.saveData<bool>(Constant.APP_FLAG_FUTURE, true);
+       CacheUtil.saveData<String>(Constant.CHANNEL_CODE,channelCode);
+       if(bindData is String) {
+         Map<String,dynamic> bindDataMap = json.decode(bindData);
+         CacheUtil.saveData<String>(Constant.BINDDATA_KEY1, bindDataMap['key1']);
+       }
+     }else {
+       bindData_falg = Constant.N;
+       CacheUtil.saveData<bool>(Constant.APP_FLAG_FUTURE, false);
+     }
+     setState(() {});
+     return data;
+   }
+
+   Future wakeupHandler(Map<String, dynamic> data) async {
+     installLog += "wakeupHandler result : channel=" +
+         data['channelCode'] +
+         ", data=" +
+         data['bindData'].toString() +
+         "\n";
+     print("wakeupHandler data = ${data}");
+     return data;
+   }
+
 }

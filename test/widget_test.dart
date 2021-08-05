@@ -8,7 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:binance_game_app/main.dart';
+import 'package:binance_game_app/main.dart.bak';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
